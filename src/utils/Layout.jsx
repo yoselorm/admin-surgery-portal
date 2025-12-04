@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Menu, Layout as LayoutIcon, Users, Settings, Home, BarChart } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { Outlet } from 'react-router-dom';
+import Sidebar from '../components/SIdebar';
 
 const Layout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
