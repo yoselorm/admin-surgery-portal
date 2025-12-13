@@ -1,43 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { addDoctor, updateDoctor } from "../redux/DoctorSlice";
 
-const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData  }) => {
+
+const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    fullname: "",
     specialty: "",
     email: "",
     phone: "",
+    country: '',
+    city: '',
     status: "active",
   });
 
-  // useEffect(() => {
-  //   if (mode === "edit" && initialData) {
-  //     setFormData(initialData);
-  //   } else if (mode === "add") {
-  //     setFormData({
-  //       name: "",
-  //       specialty: "",
-  //       email: "",
-  //       phone: "",
-  //       status: "active",
-  //     });
-  //   }
-  // }, [mode, initialData, isOpen]);
 
-  // if (!isOpen) return null;
+  const [countries, setCountries] = useState([]);
 
-  // const handleChange = (e) => {
-  //   setFormData({ ...formData, [e.target.name]: e.target.value });
-  // };
 
-  // const handleSubmit = () => {
-  //   if (!formData.name || !formData.specialty || !formData.email || !formData.phone) {
-  //     alert("Please fill in all required fields");
-  //     return;
-  //   }
-  //   onSubmit(formData);
-  //   onClose();
-  // };
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name"
+        );
+        const data = await res.json();
+
+        const countryNames = data
+          .map((country) => country.name.common)
+          .sort((a, b) => a.localeCompare(b));
+
+        setCountries(countryNames);
+      } catch (error) {
+        console.error("Failed to fetch countries:", error);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+
+  const dispatch = useDispatch();
+
+  const { loading, error } = useSelector((state) => state.doctor);
+
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     if (mode === "edit" && initialData) {
@@ -45,7 +53,7 @@ const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData
     } else if (mode === "add") {
       setFormData({
         id: null,
-        name: "",
+        fullname: "",
         specialty: "",
         email: "",
         phone: "",
@@ -60,29 +68,42 @@ const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    if (!formData.name || !formData.specialty || !formData.email || !formData.phone) {
-      alert("Please fill in all required fields");
+  const handleSubmit = async () => {
+    if (
+      !formData.fullname ||
+      !formData.specialty ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.country ||
+      !formData.city
+    ) {
       return;
     }
 
-    if (mode === "add") {
-      const newDoctor = {
-        ...formData,
-        id: Date.now(),
-      };
-      setDoctors([...doctors, newDoctor]);
-      alert("Doctor added successfully!");
-    } else if (mode === "edit") {
-      const updatedDoctors = doctors.map(doctor => 
-        doctor.id === formData.id ? formData : doctor
-      );
-      setDoctors(updatedDoctors);
-      alert("Doctor updated successfully!");
+    try {
+      if (mode === "add") {
+        await dispatch(addDoctor(formData)).unwrap();
+        setSuccessMessage("Doctor added successfully 🎉");
+      } else {
+        await dispatch(
+          updateDoctor({
+            id: initialData._id,
+            data: formData,
+          })
+        ).unwrap();
+
+        setSuccessMessage("Doctor updated successfully ✅");
+      }
+
+      setTimeout(() => {
+        setSuccessMessage("");
+        onClose();
+      }, 1500);
+    } catch (err) {
+      console.error(err);
     }
-    
-    onClose();
   };
+
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -90,11 +111,11 @@ const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div 
+      <div
         className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-fadeIn"
         onClick={(e) => e.stopPropagation()}
       >
@@ -103,7 +124,7 @@ const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData
           <h2 className="text-2xl font-bold text-white">
             {mode === "add" ? "Add New Doctor" : "Edit Doctor"}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="text-white hover:bg-white/20 rounded-lg p-1 transition"
           >
@@ -111,17 +132,33 @@ const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData
           </button>
         </div>
 
+        {successMessage && (
+          <div className="mx-6 mt-4">
+            <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold">
+              {successMessage}
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mx-6 mt-4">
+            <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm font-semibold">
+              {error}
+            </div>
+          </div>
+        )}
+
+
         {/* Form Content */}
         <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Full Name <span className="text-red-500">*</span>
+              Doctor ID <span className="text-red-500">*</span>
             </label>
             <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
+              disabled
+              value={formData.doctorId}
+              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
               placeholder="Enter full name"
             />
           </div>
@@ -166,6 +203,40 @@ const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData
               placeholder="+233..."
             />
           </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Country <span className="text-red-500">*</span>
+            </label>
+
+            <select
+              name="country"
+              value={formData.country}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
+              required
+            >
+              <option value="">Select a country</option>
+              {countries.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              City <span className="text-red-500">*</span>
+            </label>
+            <input
+              name="city"
+              type="text"
+              value={formData.city}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
+              placeholder="Accra"
+            />
+          </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -193,11 +264,21 @@ const AddEditDoctor = ({ isOpen, onClose, doctors, setDoctors, mode, initialData
             </button>
             <button
               type="button"
+              disabled={loading}
               onClick={handleSubmit}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold rounded-lg hover:shadow-lg transition transform hover:-translate-y-0.5"
+              className={`flex-1 px-4 py-2.5 font-semibold rounded-lg transition transform
+    ${loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:shadow-lg hover:-translate-y-0.5"
+                }`}
             >
-              {mode === "add" ? "Add Doctor" : "Save Changes"}
+              {loading
+                ? "Saving..."
+                : mode === "add"
+                  ? "Add Doctor"
+                  : "Save Changes"}
             </button>
+
           </div>
         </div>
       </div>

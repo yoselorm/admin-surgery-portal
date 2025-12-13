@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage'
 import ManageDoctorsPage from './pages/ManageDoctorsPage'
 import AdminSurgeryRecords from './pages/SurgeryRecords'
 import SurgeryDetailsPage from './pages/SurgeryDetailsPage'
+import PrivateRoute from './utils/PrivateRoute'
 
 function App() {
 
@@ -14,13 +15,15 @@ function App() {
     <Route path='/' element={<SignInPage/>}/>
 
 
-    <Route path='/dashboard' element={<Layout/>}>
+   <Route element={<PrivateRoute />}>
+   <Route path='/dashboard' element={<Layout/>}>
       <Route index element={<DashboardPage/>}/>
       <Route path='manage-doctors' element={<ManageDoctorsPage/>}/>
       <Route path='records' element={<AdminSurgeryRecords/>}/>
       <Route path='records/:id' element={<SurgeryDetailsPage/>}/>
 
     </Route>
+   </Route>
 
    </Routes>
   )

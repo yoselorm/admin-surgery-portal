@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Search,
     Plus,
@@ -13,6 +13,8 @@ import {
     XCircle
 } from 'lucide-react';
 import AddEditDoctor from '../components/AddEditDoctor';
+import { getAllDoctors } from '../redux/DoctorSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const ManageDoctorsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -21,75 +23,46 @@ const ManageDoctorsPage = () => {
     const [modalMode, setModalMode] = useState("add");
     const [selectedDoctor, setSelectedDoctor] = useState(null);
 
+    const dispatch = useDispatch();
 
-    // Sample doctors data
- const [doctors, setDoctors] = useState([
-    
-        {
-            id: 1,
-            name: 'Dr. Sarah Johnson',
-            specialty: 'Cardiology',
-            email: 'sarah.johnson@hospital.com',
-            phone: '+233 556 789',
-            status: 'active',
-            avatar: 'SJ'
-        },
-        {
-            id: 2,
-            name: 'Dr. Michael Chen',
-            specialty: 'Orthopedic Surgery',
-            email: 'michael.chen@hospital.com',
-            phone: '+233 553 441',
-            status: 'inactive',
-            avatar: 'MC'
-        },
-        {
-            id: 3,
-            name: 'Dr. Emily Smith',
-            specialty: 'General Surgery',
-            email: 'emily.smith@hospital.com',
-            phone: '+233 501 998',
-            status: 'active',
-            avatar: 'ES'
-        },
-        {
-            id: 4,
-            name: 'Dr. Robert Brown',
-            specialty: 'Neurosurgery',
-            email: 'robert.brown@hospital.com',
-            phone: '+233 508 223',
-            status: 'active',
-            avatar: 'RB'
-        }
-    ]);
+    const { doctors, loading, error } = useSelector(
+        (state) => state.doctor
+    );
 
-    const handleAddDoctor = () => {
-        setModalMode("add");
-        setSelectedDoctor(null);
-        setIsModalOpen(true);
-      };
-    
-      // Handle Edit Doctor
-      const handleEditDoctor = (doctor) => {
-        setModalMode("edit");
-        setSelectedDoctor(doctor);
-        setIsModalOpen(true);
-      };
-    
-      // Handle Delete Doctor
-      const handleDeleteDoctor = (doctorId) => {
-        if (window.confirm("Are you sure you want to delete this doctor?")) {
-          setDoctors(doctors.filter(doctor => doctor.id !== doctorId));
-          alert("Doctor deleted successfully!");
-        }
-      };
-    
-      // Filter doctors based on search
-      const filteredDoctors = doctors.filter(doctor =>
-        doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+
+    useEffect(() => {
+        dispatch(getAllDoctors());
+    }, [dispatch]);
+
+
+    const filteredDoctors = doctors?.filter((doctor) => {
+        const matchesSearch =
+            doctor?.doctorId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            doctor?.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            doctor?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesStatus =
+            filterStatus === "all" || doctor.status === filterStatus;
+
+        return matchesSearch && matchesStatus;
+    });
+
+    {
+        loading && (
+            <div className="p-6 text-center text-gray-500 font-semibold">
+                Loading doctors...
+            </div>
+        )
+    }
+
+    {
+        error && (
+            <div className="p-4 bg-red-100 text-red-700 rounded-lg m-4">
+                {error}
+            </div>
+        )
+    }
+
 
     // const filteredDoctors = doctors.filter((doctor) => {
     //     const matchesSearch =
@@ -101,6 +74,12 @@ const ManageDoctorsPage = () => {
 
     //     return matchesSearch && matchesStatus;
     // });
+
+    const handleEditDoctor = (doctor) => {
+        setModalMode("edit");
+        setSelectedDoctor(doctor);
+        setIsModalOpen(true);
+    };
 
     const getStatusBadge = (status) => {
         if (status === 'active') {
@@ -193,16 +172,20 @@ const ManageDoctorsPage = () => {
                         </thead>
 
                         <tbody className="divide-y divide-gray-100">
-                            {filteredDoctors.map((doctor) => (
-                                <tr key={doctor.id} className="hover:bg-gray-50 transition">
+                            {filteredDoctors?.map((doctor) => (
+                                <tr key={doctor._id} className="hover:bg-gray-50 transition">
 
                                     {/* Doctor Info */}
                                     <td className="px-6 py-4 flex items-center space-x-3">
                                         <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                            {doctor.avatar}
+                                            {doctor.fullname
+                                                .split(" ")
+                                                .map((n) => n[0])
+                                                .join("")
+                                                .slice(0, 2)}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-900">{doctor.name}</p>
+                                            <p className="font-semibold text-gray-900">{doctor.doctorId}</p>
                                         </div>
                                     </td>
 
@@ -215,22 +198,22 @@ const ManageDoctorsPage = () => {
 
                                     {/* Actions */}
                                     <td className="px-6 py-4">
-                                    <div className="flex items-center space-x-2">
-                        <button 
-                          onClick={() => handleEditDoctor(doctor)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Edit"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteDoctor(doctor.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                                        <div className="flex items-center space-x-2">
+                                            <button
+                                                onClick={() => handleEditDoctor(doctor)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                                title="Edit"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                            {/* <button
+                                                onClick={() => handleDeleteDoctor(doctor.id)}
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button> */}
+                                        </div>
                                     </td>
 
                                 </tr>
@@ -239,14 +222,13 @@ const ManageDoctorsPage = () => {
                     </table>
                 </div>
             </div>
-       
+
             <AddEditDoctor
-             isOpen={isModalOpen}
-             onClose={() => setIsModalOpen(false)}
-             doctors={doctors}         
-             setDoctors={setDoctors}    
-             mode={modalMode}            
-             initialData={selectedDoctor}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                doctors={doctors}
+                mode={modalMode}
+                initialData={selectedDoctor}
             />
         </div>
     );

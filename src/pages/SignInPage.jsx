@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Activity, Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { adminLogin } from '../redux/AuthSlice';
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -8,13 +10,25 @@ const SignInPage = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { loading } = useSelector((state) => state.auth);
 
-  const handleSubmit = (e) => {
-    // e.preventDefault();
-    // console.log('Sign in with:', { email, password, rememberMe });
-    // // Add your authentication logic here
-    navigate('/dashboard')
-  };
+
+
+  const handleLogin = () => {
+    dispatch(adminLogin({ email, password }))
+      .unwrap()
+      .then(() => navigate("/dashboard"))
+      .catch( (err) => {
+        if (typeof err === "string") {
+          setErrorMessage(err);
+        } else if (err?.message) {
+          setErrorMessage(err.message);
+        } else {
+          setErrorMessage("Login failed. Please try again.");
+        }
+      });
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-white flex items-center justify-center p-4">
@@ -23,7 +37,7 @@ const SignInPage = () => {
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
 
       <div className="w-full max-w-md relative z-10">
-      
+
 
         {/* Sign In Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
@@ -113,17 +127,19 @@ const SignInPage = () => {
             </div>
 
             {/* Sign In Button */}
+         
             <button
-              onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-cyan-600/50 transition transform hover:-translate-y-0.5 text-lg"
+              onClick={handleLogin}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-cyan-600/50 transition transform hover:-translate-y-0.5 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </div>
 
 
 
-       
+
         </div>
 
         {/* Footer */}

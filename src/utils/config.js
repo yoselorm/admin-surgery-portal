@@ -1,0 +1,1 @@
+export const api_url_v1 =`${import.meta.env.VITE_SERVICE_API}/v1`;

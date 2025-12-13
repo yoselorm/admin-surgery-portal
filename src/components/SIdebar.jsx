@@ -15,10 +15,14 @@ import {
   Bell
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '../redux/AuthSlice';
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch()
+  const {loading} = useSelector((state)=>state.auth)
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
@@ -38,7 +42,10 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   const handleNavigation = (path) => {
     navigate(path);
   };
-
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate('/');
+};
   return (
     <div 
       className={`${
@@ -120,10 +127,11 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
         )}
         
         <button 
-        onClick={()=>{navigate('/')}}
+        onClick={handleLogout}
+        disabled={loading}
         className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
           <LogOut className="w-4 h-4" />
-          {!collapsed && <span className="text-sm font-medium">Logout</span>}
+          {!collapsed && <span className="text-sm font-medium">{loading ? "Logging out...":"Logout"}</span>}
         </button>
       </div>
     </div>
