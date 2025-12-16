@@ -12,13 +12,27 @@ const SignInPage = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { loading } = useSelector((state) => state.auth);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('')
+
+
 
 
 
   const handleLogin = () => {
+    setErrorMessage(""); 
+    setSuccessMessage(""); 
     dispatch(adminLogin({ email, password }))
       .unwrap()
-      .then(() => navigate("/dashboard"))
+      .then(() => {
+        setSuccessMessage("Login successful ✅");
+
+        // navigate after short delay
+        setTimeout(() => {
+          setSuccessMessage(""); // clear badge
+          navigate("/dashboard");
+        }, 1500);
+      })
       .catch( (err) => {
         if (typeof err === "string") {
           setErrorMessage(err);
@@ -52,8 +66,23 @@ const SignInPage = () => {
             <p className="text-gray-600">Sign in to access your account</p>
           </div>
 
+          {successMessage && (
+              <div className="mt-4">
+                <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold">
+                  {successMessage}
+                </div>
+              </div>
+            )}
+
+            {errorMessage && (
+              <div className="mt-4">
+                <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm font-semibold">
+                  {errorMessage}
+                </div>
+              </div>
+            )} 
           {/* Sign In Form */}
-          <div className="space-y-6">
+          <div className="space-y-6 pt-6">
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">

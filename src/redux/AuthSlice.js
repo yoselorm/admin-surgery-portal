@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../utils/api";
 import { api_url_v1 } from "../utils/config";
+import axios from "axios";
 
 // Get admin from localStorage if exists
 const adminFromStorage = localStorage.getItem('admin')
@@ -13,7 +14,7 @@ export const adminLogin = createAsyncThunk(
   "auth/adminLogin",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const res = await api.post(`${api_url_v1}/admin-login`, { email, password });
+      const res = await axios.post(`${api_url_v1}/admin-login`, { email, password });
 
       // Save accessToken and admin data
       localStorage.setItem("accessToken", res?.data?.accessToken);

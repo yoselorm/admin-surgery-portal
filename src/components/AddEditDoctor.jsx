@@ -151,7 +151,7 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
 
         {/* Form Content */}
         <div className="p-6 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-          <div>
+          {mode === 'edit' ? <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Doctor ID <span className="text-red-500">*</span>
             </label>
@@ -162,6 +162,19 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
               placeholder="Enter full name"
             />
           </div>
+          :
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Fullname <span className="text-red-500">*</span>
+            </label>
+            <input
+              name="fullname"
+              onChange={handleChange}
+              value={formData.fullname}
+              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
+              placeholder="Enter full name"
+            />
+          </div>}
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
