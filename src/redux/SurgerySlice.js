@@ -3,32 +3,8 @@ import api from '../utils/api';
 import { api_url_v1 } from '../utils/config';
 
 
-export const createSurgery = createAsyncThunk(
-  'surgery/create',
-  async (payload, { rejectWithValue }) => {
-    try {
-      const res = await api.post(`${api_url_v1}/surgery`, payload);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
 
-// 2. Update surgery (save progress / follow-up / complete)
-export const updateSurgery = createAsyncThunk(
-  'surgery/update',
-  async ({ id, data }, { rejectWithValue }) => {
-    try {
-      const res = await api.put(`${api_url_v1}/upadete-surgery/${id}`, data);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
 
-// 3. Fetch all surgeries
 export const fetchSurgeries = createAsyncThunk(
   'surgery/fetchAll',
   async (_, { rejectWithValue }) => {
@@ -61,7 +37,7 @@ export const fetchSurgeryById = createAsyncThunk(
   'surgery/fetchOne',
   async (id, { rejectWithValue }) => {
     try {
-      const res = await api.get(`${api_url_v1}/user-surgery/${id}`);
+      const res = await api.get(`${api_url_v1}/admin/surgery/${id}`);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -98,42 +74,6 @@ const surgerySlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      /* CREATE */
-      .addCase(createSurgery.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(createSurgery.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-        state.surgeries.unshift(action.payload);
-      })
-      .addCase(createSurgery.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      /* UPDATE */
-      .addCase(updateSurgery.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateSurgery.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-
-        state.surgeries = state.surgeries.map((s) =>
-          s._id === action.payload._id ? action.payload : s
-        );
-
-        if (state.currentSurgery?._id === action.payload._id) {
-          state.currentSurgery = action.payload;
-        }
-      })
-      .addCase(updateSurgery.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
 
       /* FETCH ALL */
       .addCase(fetchSurgeries.pending, (state) => {

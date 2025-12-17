@@ -47,13 +47,8 @@ const ManageDoctorsPage = () => {
         return matchesSearch && matchesStatus;
     });
 
-    {
-        loading && (
-            <div className="p-6 text-center text-gray-500 font-semibold">
-                Loading doctors...
-            </div>
-        )
-    }
+ 
+      
 
     {
         error && (
@@ -97,6 +92,15 @@ const ManageDoctorsPage = () => {
             </span>
         );
     };
+
+    if (loading) {
+        return (
+          <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-gray-500 font-medium">Loading...</p>
+          </div>
+        );
+      }
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen ">

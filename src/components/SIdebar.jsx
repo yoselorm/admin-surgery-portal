@@ -17,6 +17,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../redux/AuthSlice';
+import toast from './Toast';
 
 const Sidebar = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
@@ -42,10 +43,15 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
   const handleNavigation = (path) => {
     navigate(path);
   };
-  const handleLogout = () => {
-    dispatch(logoutUser());
-    navigate('/');
-};
+  const handleLogout = (e) => {
+    e.preventDefault();  
+    dispatch(logoutUser())
+      .unwrap()
+      .then(() => {
+        navigate('/');
+        toast.success('Logged out successfully!');
+      });
+  };
   return (
     <div 
       className={`${

@@ -25,7 +25,7 @@ const AdminSurgeryRecords = () => {
 
 
 
-  const { surgeries } = useSelector((state) => state.surgeries);
+  const { surgeries,loading } = useSelector((state) => state.surgeries);
 
   const handleExport = () => {
     exportToCSV(surgeries, "all_surgery_records.csv");
@@ -101,6 +101,15 @@ const AdminSurgeryRecords = () => {
       </span>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-500 font-medium">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
