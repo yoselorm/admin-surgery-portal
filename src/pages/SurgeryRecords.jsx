@@ -60,10 +60,8 @@ const AdminSurgeryRecords = () => {
       case 'in-progress':
       case 'in progress':
         return 'blue';
-      case 'scheduled':
-        return 'yellow';
       case 'incomplete':
-        return 'red';
+        return 'yellow';
       default:
         return 'gray';
     }

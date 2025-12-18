@@ -23,13 +23,8 @@ const AdminLHPSurgeryDetails = ({ currentSurgery, loading }) => {
       case 'completed':
       case 'complete':
         return { bgClass: 'bg-green-100', textClass: 'text-green-800', borderClass: 'border-green-300', label: 'Completed' };
-      case 'in-progress':
-      case 'in progress':
-        return { bgClass: 'bg-blue-100', textClass: 'text-blue-800', borderClass: 'border-blue-300', label: 'In Progress' };
-      case 'scheduled':
-        return { bgClass: 'bg-yellow-100', textClass: 'text-yellow-800', borderClass: 'border-yellow-300', label: 'Scheduled' };
       case 'incomplete':
-        return { bgClass: 'bg-red-100', textClass: 'text-red-800', borderClass: 'border-red-300', label: 'Incomplete' };
+        return { bgClass: 'bg-yellow-100', textClass: 'text-yellow-800', borderClass: 'border-yellow-300', label: 'Incomplete' };
       default:
         return { bgClass: 'bg-gray-100', textClass: 'text-gray-800', borderClass: 'border-gray-300', label: 'Unknown' };
     }

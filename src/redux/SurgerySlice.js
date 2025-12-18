@@ -23,7 +23,7 @@ export const fetchSurgeriesByDoctor = createAsyncThunk(
   async (doctorId, { rejectWithValue }) => {
     try {
       const res = await api.get(
-        `${api_url_v1}/surgeries/doctor/${doctorId}`
+        `${api_url_v1}/surgery/${doctorId}`
       );
       return res.data;
     } catch (err) {
@@ -53,10 +53,13 @@ const surgerySlice = createSlice({
   name: 'surgery',
   initialState: {
     surgeries: [],
+    doctorSurgeries:[],
     currentSurgery: null,
     loading: false,
     error: null,
+    doctor:null,
     success: false,
+    count: 0
   },
 
   reducers: {
@@ -94,7 +97,9 @@ const surgerySlice = createSlice({
       })
       .addCase(fetchSurgeriesByDoctor.fulfilled, (state, action) => {
         state.loading = false;
-        state.surgeries = action.payload;
+        state.doctorSurgeries = action.payload.data;
+        state.count = action.payload.count;
+        state.doctor = action.payload.doctor
       })
       .addCase(fetchSurgeriesByDoctor.rejected, (state, action) => {
         state.loading = false;

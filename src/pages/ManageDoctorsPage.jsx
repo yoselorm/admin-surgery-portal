@@ -10,11 +10,13 @@ import {
     Stethoscope,
     ChevronDown,
     CheckCircle,
-    XCircle
+    XCircle,
+    Eye
 } from 'lucide-react';
 import AddEditDoctor from '../components/AddEditDoctor';
 import { getAllDoctors } from '../redux/DoctorSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 const ManageDoctorsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -210,13 +212,12 @@ const ManageDoctorsPage = () => {
                                             >
                                                 <Edit className="w-4 h-4" />
                                             </button>
-                                            {/* <button
-                                                onClick={() => handleDeleteDoctor(doctor.id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                title="Delete"
+                                            <Link
+                                                to={`/dashboard/doctor/${doctor._id}`}
+                                                className="p-2 text-green-600 hover:bg-red-50 rounded-lg transition"
                                             >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button> */}
+                                                <Eye className="w-4 h-4" />
+                                            </Link>
                                         </div>
                                     </td>
 

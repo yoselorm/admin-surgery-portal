@@ -7,6 +7,7 @@ import ManageDoctorsPage from './pages/ManageDoctorsPage'
 import AdminSurgeryRecords from './pages/SurgeryRecords'
 import SurgeryDetailsPage from './pages/SurgeryDetailsPage'
 import PrivateRoute from './utils/PrivateRoute'
+import DoctorSurgeryPage from './pages/DoctorSurgeryPage'
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
       <Route path='manage-doctors' element={<ManageDoctorsPage/>}/>
       <Route path='records' element={<AdminSurgeryRecords/>}/>
       <Route path='records/:id' element={<SurgeryDetailsPage/>}/>
+      <Route path='doctor/:id' element={<DoctorSurgeryPage/>}/>
 
     </Route>
    </Route>
