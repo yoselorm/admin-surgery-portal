@@ -13,7 +13,7 @@ import {
   Activity,
   Database
 } from 'lucide-react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../redux/AuthSlice';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from './Toast';
@@ -23,6 +23,7 @@ const Header = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { loading } = useSelector((state) => state.auth)
 
   const notifications = [
     { id: 1, text: 'New doctor registration pending approval', time: '5 min ago', unread: true, type: 'warning' },
@@ -40,14 +41,14 @@ const Header = () => {
   ];
 
 
-  
+
   const handleLogout = (e) => {
     e.preventDefault();
-    setShowProfileMenu(false);
-  
+
     dispatch(logoutUser())
       .unwrap()
       .then(() => {
+        setShowProfileMenu(false);
         navigate('/');
         toast.success('Logged out successfully!');
       });
@@ -70,7 +71,7 @@ const Header = () => {
         {/* Right Section */}
         <div className="flex items-center space-x-6 ml-6">
           {/* Quick Stats */}
-          <div className="hidden xl:flex items-center space-x-4">
+          {/* <div className="hidden xl:flex items-center space-x-4">
             {quickStats.map((stat, index) => {
               const Icon = stat.icon;
               return (
@@ -85,10 +86,9 @@ const Header = () => {
                 </div>
               );
             })}
-          </div>
+          </div> */}
 
           {/* Divider */}
-          <div className="h-8 w-px bg-gray-300"></div>
 
 
           {/* Divider */}
@@ -143,12 +143,48 @@ const Header = () => {
 
                 <div className="border-t border-gray-200 py-2">
                   <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-3 px-4 py-3 w-full hover:bg-red-50 transition text-left">
-                    <LogOut className="w-4 h-4 text-red-600" />
-                    <span className="text-sm text-red-600 font-medium">Logout</span>
+                    onClick={handleLogout}
+                    disabled={loading}
+                    className={`flex items-center space-x-3 px-4 py-3 w-full transition text-left
+      ${loading ? 'cursor-not-allowed opacity-70' : 'hover:bg-red-50'}`}
+                  >
+                    {loading ? (
+                      <>
+                        {/* Spinner */}
+                        <svg
+                          className="w-4 h-4 animate-spin text-red-600"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                          />
+                        </svg>
+
+                        <span className="text-sm text-red-600 font-medium">
+                          Logging out...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="w-4 h-4 text-red-600" />
+                        <span className="text-sm text-red-600 font-medium">Logout</span>
+                      </>
+                    )}
                   </button>
                 </div>
+
               </div>
             )}
           </div>

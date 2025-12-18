@@ -3,6 +3,7 @@ import { Activity, Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { adminLogin } from '../redux/AuthSlice';
+import toast from '../components/Toast';
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,12 +27,10 @@ const SignInPage = () => {
       .unwrap()
       .then(() => {
         setSuccessMessage("Login successful ✅");
+        navigate("/dashboard");
+        toast.success("Login successful ✅")
 
-        // navigate after short delay
-        setTimeout(() => {
-          setSuccessMessage(""); // clear badge
-          navigate("/dashboard");
-        }, 1500);
+
       })
       .catch( (err) => {
         if (typeof err === "string") {
