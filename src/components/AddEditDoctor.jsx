@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { addDoctor, updateDoctor } from "../redux/DoctorSlice";
+import toast from "./Toast";
 
 
 const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
@@ -43,9 +44,8 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
 
   const dispatch = useDispatch();
 
-  const { loading, error } = useSelector((state) => state.doctor);
+  const { updateLoading, error } = useSelector((state) => state.doctor);
 
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     if (mode === "edit" && initialData) {
@@ -83,7 +83,7 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
     try {
       if (mode === "add") {
         await dispatch(addDoctor(formData)).unwrap();
-        setSuccessMessage("Doctor added successfully 🎉");
+        toast.success("Doctor added successfully ✅")
       } else {
         await dispatch(
           updateDoctor({
@@ -91,16 +91,14 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
             data: formData,
           })
         ).unwrap();
+        toast.success("Doctor updated successfully ✅")
 
-        setSuccessMessage("Doctor updated successfully ✅");
       }
+      onClose()
 
-      setTimeout(() => {
-        setSuccessMessage("");
-        onClose();
-      }, 1500);
     } catch (err) {
       console.error(err);
+      toast.error('Failed to update')
     }
   };
 
@@ -132,21 +130,7 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
           </button>
         </div>
 
-        {successMessage && (
-          <div className="mx-6 mt-4">
-            <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold">
-              {successMessage}
-            </div>
-          </div>
-        )}
 
-        {error && (
-          <div className="mx-6 mt-4">
-            <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm font-semibold">
-              {error}
-            </div>
-          </div>
-        )}
 
 
         {/* Form Content */}
@@ -162,19 +146,19 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
               placeholder="Enter full name"
             />
           </div>
-          :
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Fullname <span className="text-red-500">*</span>
-            </label>
-            <input
-              name="fullname"
-              onChange={handleChange}
-              value={formData.fullname}
-              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
-              placeholder="Enter full name"
-            />
-          </div>}
+            :
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Fullname <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="fullname"
+                onChange={handleChange}
+                value={formData.fullname}
+                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition"
+                placeholder="Enter full name"
+              />
+            </div>}
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -277,15 +261,15 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
             </button>
             <button
               type="button"
-              disabled={loading}
+              disabled={updateLoading}
               onClick={handleSubmit}
               className={`flex-1 px-4 py-2.5 font-semibold rounded-lg transition transform
-    ${loading
+    ${updateLoading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:shadow-lg hover:-translate-y-0.5"
                 }`}
             >
-              {loading
+              {updateLoading
                 ? "Saving..."
                 : mode === "add"
                   ? "Add Doctor"

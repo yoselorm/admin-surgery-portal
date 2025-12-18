@@ -53,6 +53,7 @@ const doctorSlice = createSlice({
   initialState: {
     doctors: [],
     loading: false,
+    updateLoading:false,
     error: null,
   },
   reducers: {
@@ -65,25 +66,25 @@ const doctorSlice = createSlice({
 
       /* ---- ADD ---- */
       .addCase(addDoctor.pending, (state) => {
-        state.loading = true;
+        state.updateLoading = true;
         state.error = null;
       })
       .addCase(addDoctor.fulfilled, (state, action) => {
-        state.loading = false;
+        state.updateLoading = false;
         state.doctors.unshift(action.payload.user);
       })
       .addCase(addDoctor.rejected, (state, action) => {
-        state.loading = false;
+        state.updateLoading = false;
         state.error = action.payload;
       })
 
       /* ---- UPDATE ---- */
       .addCase(updateDoctor.pending, (state) => {
-        state.loading = true;
+        state.updateLoading = true;
         state.error = null;
       })
       .addCase(updateDoctor.fulfilled, (state, action) => {
-        state.loading = false;
+        state.updateLoading = false;
         const index = state.doctors.findIndex(
           (doc) => doc._id === action.payload.user._id
         );
@@ -92,7 +93,7 @@ const doctorSlice = createSlice({
         }
       })
       .addCase(updateDoctor.rejected, (state, action) => {
-        state.loading = false;
+        state.updateLoading = false;
         state.error = action.payload;
       })
       

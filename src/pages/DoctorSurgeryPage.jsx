@@ -168,7 +168,7 @@ const DoctorSurgeryPage = () => {
           </button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Doctor Profile</h1>
-            <p className="text-gray-600 mt-1">View all doctorSurgeries and performance metrics</p>
+            <p className="text-gray-600 mt-1">View all Surgeries and performance metrics</p>
           </div>
         </div>
 
@@ -223,7 +223,7 @@ const DoctorSurgeryPage = () => {
                   </span>
                 )}
                 <span className="px-4 py-2 rounded-full text-sm font-semibold bg-cyan-100 text-cyan-700">
-                  {stats.total} doctorSurgeries
+                  {stats.total} Surgeries
                 </span>
               </div>
             </div>
@@ -235,7 +235,7 @@ const DoctorSurgeryPage = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total doctorSurgeries</p>
+                <p className="text-gray-600 text-sm font-medium">Total Surgeries</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
@@ -332,7 +332,7 @@ const DoctorSurgeryPage = () => {
               <div>
                 <h2 className="text-xl font-bold text-gray-900">Surgery Records</h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Showing {filteredSurgeries?.length || 0} of {stats.total} doctorSurgeries
+                  Showing {filteredSurgeries?.length || 0} of {stats.total} Surgeries
                 </p>
               </div>
             </div>
@@ -386,7 +386,7 @@ const DoctorSurgeryPage = () => {
             ) : (
               <div className="p-12 text-center text-gray-500">
                 <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-lg font-medium">No doctorSurgeries found</p>
+                <p className="text-lg font-medium">No Surgeries found</p>
                 <p className="text-sm mt-1">Try adjusting your filters or search term</p>
               </div>
             )}
