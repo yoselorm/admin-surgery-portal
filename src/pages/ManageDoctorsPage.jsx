@@ -31,6 +31,8 @@ const ManageDoctorsPage = () => {
         (state) => state.doctor
     );
 
+    const {admin} = useSelector((state)=>state.auth)
+
 
     useEffect(() => {
         dispatch(getAllDoctors());
@@ -170,8 +172,8 @@ const ManageDoctorsPage = () => {
                             <tr>
                                 <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Doctor</th>
                                 <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Specialty</th>
-                                <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Email</th>
-                                <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Phone</th>
+                               { admin.role === 'super-admin' && <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Email</th>}
+                                {admin.role === 'super-admin' && <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Phone</th>}
                                 <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Status</th>
                                 <th className="px-6 py-3 text-xs font-bold text-gray-600 uppercase">Actions</th>
                             </tr>
@@ -184,11 +186,12 @@ const ManageDoctorsPage = () => {
                                     {/* Doctor Info */}
                                     <td className="px-6 py-4 flex items-center space-x-3">
                                         <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                            {doctor.fullname
+                                            {/* {doctor.fullname
                                                 .split(" ")
                                                 .map((n) => n[0])
                                                 .join("")
-                                                .slice(0, 2)}
+                                                .slice(0, 2)} */}
+                                                DR
                                         </div>
                                         <div>
                                             <p className="font-semibold text-gray-900">{doctor.doctorId}</p>
@@ -196,8 +199,8 @@ const ManageDoctorsPage = () => {
                                     </td>
 
                                     <td className="px-6 py-4 text-gray-600">{doctor.specialty}</td>
-                                    <td className="px-6 py-4 text-gray-600">{doctor.email}</td>
-                                    <td className="px-6 py-4 text-gray-600">{doctor.phone}</td>
+                                    {admin?.role === 'super-admin' && <td className="px-6 py-4 text-gray-600">{doctor.email}</td>}
+                                    {admin?.role === 'super-admin' && <td className="px-6 py-4 text-gray-600">{doctor.phone}</td>}
 
                                     {/* Status */}
                                     <td className="px-6 py-4">{getStatusBadge(doctor.status)}</td>

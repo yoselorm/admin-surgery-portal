@@ -23,7 +23,7 @@ const Header = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { loading } = useSelector((state) => state.auth)
+  const { loading ,admin} = useSelector((state) => state.auth)
 
   const notifications = [
     { id: 1, text: 'New doctor registration pending approval', time: '5 min ago', unread: true, type: 'warning' },
@@ -107,7 +107,7 @@ const Header = () => {
                 AD
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-semibold text-gray-900">Admin User</p>
+                <p className="text-sm font-semibold text-gray-900">{admin?.role}</p>
                 <p className="text-xs text-gray-500">Administrator</p>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-600" />
@@ -123,7 +123,7 @@ const Header = () => {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">Admin User</p>
-                      <p className="text-xs text-gray-500">admin@isolp.com</p>
+                      <p className="text-xs text-gray-500">{admin?.email}</p>
                       <div className="flex items-center space-x-1 mt-1">
                         <Shield className="w-3 h-3 text-purple-600" />
                         <span className="text-xs text-purple-600 font-semibold">System Administrator</span>

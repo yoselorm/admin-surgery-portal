@@ -262,8 +262,8 @@ const DashboardPage = () => {
         {/* Top Performing Doctors */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Top Doctors</h2>
-            <p className="text-sm text-gray-500 mt-1">Based on performance</p>
+            <h2 className="text-xl font-bold text-gray-900">Contributors</h2>
+            <p className="text-sm text-gray-500 mt-1">Based on number of surgeries being recorded</p>
           </div>
           <div className="p-4 space-y-4">
             {topDoctors && topDoctors.length > 0 ? (
@@ -274,7 +274,7 @@ const DashboardPage = () => {
                 >
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      {getInitials(doctor?.fullname)}
+                      DR
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">

@@ -32,6 +32,7 @@ const DoctorSurgeryPage = () => {
 
   // Redux state - adjust according to your actual Redux state structure
   const { doctorSurgeries, doctor, loading, error } = useSelector((state) => state.surgeries);
+  const {admin} = useSelector((state)=>state.auth)
 
   useEffect(() => {
     if (id) {
@@ -95,14 +96,6 @@ const DoctorSurgeryPage = () => {
     );
   };
 
-  const getInitials = (name) => {
-    return name
-      ?.split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) || 'DR';
-  };
 
   if (loading) {
     return (
@@ -178,7 +171,7 @@ const DoctorSurgeryPage = () => {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between">
               <div className="flex items-start space-x-4">
                 <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
-                  {getInitials(doctorData.fullname || doctorData.doctorId)}
+                  DR
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">
@@ -189,7 +182,7 @@ const DoctorSurgeryPage = () => {
                   )}
                   <p className="text-sm text-gray-500 mt-1">ID: {doctorData.doctorId}</p>
                   
-                  <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
+               { admin?.role === 'super-admin' &&  <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-600">
                     {doctorData.email && (
                       <div className="flex items-center space-x-2">
                         <Mail className="w-4 h-4" />
@@ -208,7 +201,7 @@ const DoctorSurgeryPage = () => {
                         <span>{doctorData.city}, {doctorData.country}</span>
                       </div>
                     )}
-                  </div>
+                  </div>}
                 </div>
               </div>
 
@@ -271,7 +264,7 @@ const DoctorSurgeryPage = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Success Rate</p>
+                <p className="text-gray-600 text-sm font-medium">Complete Data Contribution Rate</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">{stats.completionRate}%</p>
               </div>
               <div className="bg-purple-100 p-3 rounded-lg">

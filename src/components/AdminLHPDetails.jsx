@@ -2,9 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Calendar, User, Hash, ArrowLeft, Activity, Stethoscope, Syringe, Zap, FileText, ClipboardList } from 'lucide-react';
 import { generateLHPSurgeryPDF } from '../utils/pdfGenerators';
+import { useSelector } from 'react-redux';
 
 const AdminLHPSurgeryDetails = ({ currentSurgery, loading }) => {
   const navigate = useNavigate();
+  const {admin} = useSelector((state)=>state.auth)
 
   if (loading || !currentSurgery) {
     return (
@@ -140,7 +142,7 @@ const AdminLHPSurgeryDetails = ({ currentSurgery, loading }) => {
         </Section>
 
         {/* Doctor Information */}
-        {currentSurgery.doctor && (
+        {currentSurgery.doctor && admin.role ==='super-admin' && (
           <Section title="Doctor Information" icon={Stethoscope}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
               <DataRow label="Doctor Name" value={currentSurgery.doctor.fullname} />
