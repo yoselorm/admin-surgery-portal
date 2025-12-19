@@ -98,7 +98,7 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
 
     } catch (err) {
       console.error(err);
-      toast.error('Failed to update')
+      toast.error(err || 'Failed to update')
     }
   };
 
@@ -265,7 +265,7 @@ const AddEditDoctor = ({ isOpen, onClose, mode, initialData }) => {
               onClick={handleSubmit}
               className={`flex-1 px-4 py-2.5 font-semibold rounded-lg transition transform
     ${updateLoading
-                  ? "bg-gray-400 cursor-not-allowed"
+                  ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white cursor-not-allowed"
                   : "bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:shadow-lg hover:-translate-y-0.5"
                 }`}
             >
