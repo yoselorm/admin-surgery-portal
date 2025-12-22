@@ -57,10 +57,10 @@ const AdminSurgeryRecords = () => {
       case 'completed':
       case 'complete':
         return 'green';
-      case 'in-progress':
+      case 'follow-ups':
       case 'in progress':
         return 'blue';
-      case 'incomplete':
+      case 'draft':
         return 'yellow';
       default:
         return 'gray';
@@ -144,10 +144,9 @@ const AdminSurgeryRecords = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
             <option value="all">All Status</option>
-            <option value="completed">Completed</option>
-            <option value="incomplete">Incomplete</option>
-            <option value="in-progress">In Progress</option>
-            <option value="scheduled">Scheduled</option>
+            <option value="complete">Completed</option>
+            <option value="draft">Draft</option>
+            <option value="follow-ups">Follow ups</option>
           </select>
 
           {/* Export Button */}

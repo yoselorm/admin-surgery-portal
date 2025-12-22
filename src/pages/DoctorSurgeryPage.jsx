@@ -47,7 +47,7 @@ const DoctorSurgeryPage = () => {
   const stats = {
     total: doctorSurgeries?.length || 0,
     completed: doctorSurgeries?.filter(s => s.status === 'complete').length || 0,
-    incomplete: doctorSurgeries?.filter(s => s.status === 'incomplete').length || 0,
+    followUps: doctorSurgeries?.filter(s => s.status === 'follow-ups').length || 0,
     completionRate: doctorSurgeries?.length > 0 
       ? ((doctorSurgeries.filter(s => s.status === 'complete').length / doctorSurgeries.length) * 100).toFixed(1)
       : 0
@@ -85,7 +85,7 @@ const DoctorSurgeryPage = () => {
   const getStatusBadge = (status) => {
     const config = {
       complete: { label: 'Complete', className: 'bg-green-100 text-green-700' },
-      incomplete: { label: 'Incomplete', className: 'bg-yellow-100 text-yellow-700' }
+      followUps: { label: 'follow-ups', className: 'bg-yellow-100 text-yellow-700' }
     };
     const statusConfig = config[status] || { label: status, className: 'bg-gray-100 text-gray-700' };
     
@@ -252,8 +252,8 @@ const DoctorSurgeryPage = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Incomplete</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.incomplete}</p>
+                <p className="text-gray-600 text-sm font-medium">follow-ups</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.follow-ups}</p>
               </div>
               <div className="bg-yellow-100 p-3 rounded-lg">
                 <Clock className="w-6 h-6 text-yellow-600" />
@@ -298,7 +298,7 @@ const DoctorSurgeryPage = () => {
               >
                 <option value="all">All Status</option>
                 <option value="complete">Complete</option>
-                <option value="incomplete">Incomplete</option>
+                <option value="follow-ups">follow-ups</option>
               </select>
 
               <select

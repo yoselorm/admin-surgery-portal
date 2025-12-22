@@ -62,7 +62,7 @@ const DashboardPage = () => {
   const getStatusColor = (status) => {
     const colors = {
       complete: 'bg-green-100 text-green-700',
-      incomplete: 'bg-yellow-100 text-yellow-700'
+      draft: 'bg-yellow-100 text-yellow-700'
     };
     return colors[status] || 'bg-gray-100 text-gray-700';
   };
@@ -129,11 +129,11 @@ const DashboardPage = () => {
       iconColor: 'text-green-600'
     },
     {
-      title: 'Incomplete',
-      value: dashboardData?.summary?.incompleteSurgeries || 0,
+      title: 'draft',
+      value: dashboardData?.summary?.draftSurgeries || 0,
       change: 'Pending',
-      trend: dashboardData?.summary?.incompleteSurgeries > 0 ? 'down' : 'up',
-      percentage: `${dashboardData?.summary?.incompleteSurgeries || 0} pending`,
+      trend: dashboardData?.summary?.draftSurgeries > 0 ? 'down' : 'up',
+      percentage: `${dashboardData?.summary?.draftSurgeries || 0} pending`,
       icon: Clock,
       bgColor: 'bg-yellow-100',
       iconColor: 'text-yellow-600'
@@ -321,8 +321,8 @@ const DashboardPage = () => {
                     <span className="font-semibold text-green-600">{trend.complete}</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">Incomplete:</span>
-                    <span className="font-semibold text-yellow-600">{trend.incomplete}</span>
+                    <span className="text-gray-600">draft:</span>
+                    <span className="font-semibold text-yellow-600">{trend.draft}</span>
                   </div>
                 </div>
               </div>
