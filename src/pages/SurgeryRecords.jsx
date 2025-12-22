@@ -216,7 +216,7 @@ const AdminSurgeryRecords = () => {
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
                       <Clock className="w-4 h-4 text-gray-400" />
-                      <span>{formatTime(record.date)}</span>
+                      <span>{formatTime(record.createdAt)}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
