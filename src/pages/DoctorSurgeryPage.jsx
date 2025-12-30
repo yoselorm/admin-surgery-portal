@@ -253,7 +253,7 @@ const DoctorSurgeryPage = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">follow-ups</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.follow-ups}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.followUps}</p>
               </div>
               <div className="bg-yellow-100 p-3 rounded-lg">
                 <Clock className="w-6 h-6 text-yellow-600" />

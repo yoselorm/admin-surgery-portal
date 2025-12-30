@@ -132,14 +132,14 @@ const Header = () => {
                   </div>
                 </div>
 
-                <div className="py-2">
+                {/* <div className="py-2">
                   <Link
                     className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition"
                   >
                     <User className="w-4 h-4 text-gray-600" />
                     <span className="text-sm text-gray-700">Admin Profile</span>
                   </Link>
-                </div>
+                </div> */}
 
                 <div className="border-t border-gray-200 py-2">
                   <button

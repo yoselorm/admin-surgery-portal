@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { adminLogin } from '../redux/AuthSlice';
 import toast from '../components/Toast';
+import logo from '../assets/isplogonormal.svg';
+
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,8 +23,8 @@ const SignInPage = () => {
 
 
   const handleLogin = () => {
-    setErrorMessage(""); 
-    setSuccessMessage(""); 
+    setErrorMessage("");
+    setSuccessMessage("");
     dispatch(adminLogin({ email, password }))
       .unwrap()
       .then(() => {
@@ -32,7 +34,7 @@ const SignInPage = () => {
 
 
       })
-      .catch( (err) => {
+      .catch((err) => {
         if (typeof err === "string") {
           setErrorMessage(err);
         } else if (err?.message) {
@@ -57,29 +59,33 @@ const SignInPage = () => {
           {/* Logo and Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="bg-gradient-to-br from-cyan-600 to-blue-600 p-3 rounded-2xl">
-                <Activity className="w-10 h-10 text-white" />
+              <div>
+                <img
+                  src={logo}
+                  alt="ISOLP Logo"
+                  className='h-20 w-20'
+                />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome </h1>
             <p className="text-gray-600">Sign in to access your account</p>
           </div>
 
           {successMessage && (
-              <div className="mt-4">
-                <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold">
-                  {successMessage}
-                </div>
+            <div className="mt-4">
+              <div className="bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg text-sm font-semibold">
+                {successMessage}
               </div>
-            )}
+            </div>
+          )}
 
-            {errorMessage && (
-              <div className="mt-4">
-                <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm font-semibold">
-                  {errorMessage}
-                </div>
+          {errorMessage && (
+            <div className="mt-4">
+              <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm font-semibold">
+                {errorMessage}
               </div>
-            )} 
+            </div>
+          )}
           {/* Sign In Form */}
           <div className="space-y-6 pt-6">
             {/* Email Field */}
@@ -155,7 +161,7 @@ const SignInPage = () => {
             </div>
 
             {/* Sign In Button */}
-         
+
             <button
               onClick={handleLogin}
               disabled={loading}
@@ -173,14 +179,14 @@ const SignInPage = () => {
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>Protected by industry-leading security standards</p>
-          <div className="flex justify-center items-center space-x-4 mt-2">
+          {/* <div className="flex justify-center items-center space-x-4 mt-2">
             <span className="flex items-center space-x-1">
               <Lock className="w-3 h-3" />
               <span>HIPAA Compliant</span>
             </span>
             <span>•</span>
             <span>256-bit Encryption</span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
