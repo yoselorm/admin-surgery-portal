@@ -69,7 +69,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           </div>
           {!collapsed && (
             <div>
-              <span className="text-xl font-bold">SurgSuite</span>
+              <span className="text-xl font-bold">SurgiDesk</span>
               <p className="text-xs text-gray-400">Admin Panel</p>
             </div>
           )}
