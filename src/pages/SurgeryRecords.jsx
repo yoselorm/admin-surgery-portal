@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Plus,
   Search,
   Download,
   Eye,
@@ -10,11 +9,15 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { exportToCSV } from '../utils/Helper';
-import { fetchSurgeries } from '../redux/SurgerySlice';
+import { exportFilteredSurgeries, fetchSurgeries } from '../redux/SurgerySlice';
+import ExportFilterModal from '../components/ExportFilterModal';
+import axios from 'axios';
+import toast from '../components/Toast';
 
 const AdminSurgeryRecords = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -23,15 +26,29 @@ const AdminSurgeryRecords = () => {
     dispatch(fetchSurgeries());
   }, [dispatch]);
 
+  const { surgeries, loading } = useSelector((state) => state.surgeries);
 
-
-  const { surgeries,loading } = useSelector((state) => state.surgeries);
-
-  const handleExport = () => {
-    exportToCSV(surgeries, "all_surgery_records.csv");
+  const handleExportWithFilters = async (exportConfig) => {
+    try {
+      // Dispatch the export action
+      const result = await dispatch(exportFilteredSurgeries({
+        procedure: exportConfig.procedure,
+        filters: exportConfig.filters
+      })).unwrap();
+  
+      // Export the filtered data to CSV
+      const filteredData = result.data;
+      const fileName = `${exportConfig.procedure}_surgery_records_${new Date().toISOString().split('T')[0]}.csv`;
+      exportToCSV(filteredData, fileName);
+      
+      // Show success message
+      toast.success(`Successfully exported ${filteredData.length} records!`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export data. Please try again.');
+    }
   };
 
-  // Format date helper
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -41,7 +58,6 @@ const AdminSurgeryRecords = () => {
     });
   };
 
-  // Format time helper
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { 
@@ -50,7 +66,6 @@ const AdminSurgeryRecords = () => {
     });
   };
 
-  // Get status color mapping
   const getStatusColor = (status) => {
     const statusLower = status?.toLowerCase();
     switch (statusLower) {
@@ -73,8 +88,8 @@ const AdminSurgeryRecords = () => {
       return (
         r.surgeryId?.toLowerCase().includes(term) ||
         r.patientName?.toLowerCase().includes(term) ||
-        r.procedure?.toLowerCase().includes(term)||
-        r.doctorId?.toLowerCase().includes(term)
+        r.procedure?.toLowerCase().includes(term) ||
+        r.doctor?.fullname?.toLowerCase().includes(term)
       );
     })
     .filter((r) =>
@@ -110,16 +125,13 @@ const AdminSurgeryRecords = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-   
-
+    <div className="p-6 ">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Surgery Records</h1>
           <p className="text-gray-600 mt-1">Manage and view all surgical procedures</p>
         </div>
-       
       </div>
 
       {/* Filters and Search */}
@@ -149,16 +161,23 @@ const AdminSurgeryRecords = () => {
             <option value="follow-ups">Follow ups</option>
           </select>
 
-          {/* Export Button */}
+          {/* Export Button - Opens Modal */}
           <button 
-            onClick={handleExport}
-            className="flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            onClick={() => setIsExportModalOpen(true)}
+            className="flex items-center justify-center space-x-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition"
           >
             <Download className="w-4 h-4" />
             <span>Export</span>
           </button>
         </div>
       </div>
+
+      {/* Export Filter Modal */}
+      <ExportFilterModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleExportWithFilters}
+      />
 
       {/* Records Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
