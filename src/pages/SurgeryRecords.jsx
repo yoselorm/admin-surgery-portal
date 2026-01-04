@@ -18,6 +18,8 @@ const AdminSurgeryRecords = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+      const {admin} = useSelector((state)=>state.auth)
+  
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -162,13 +164,13 @@ const AdminSurgeryRecords = () => {
           </select>
 
           {/* Export Button - Opens Modal */}
-          <button 
+       { admin.role === 'super-admin' &&  <button 
             onClick={() => setIsExportModalOpen(true)}
             className="flex items-center justify-center space-x-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition"
           >
             <Download className="w-4 h-4" />
             <span>Export</span>
-          </button>
+          </button>}
         </div>
       </div>
 
