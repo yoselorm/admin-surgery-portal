@@ -22,7 +22,7 @@ import api from '../utils/api';
 import { api_url_v1 } from '../utils/config';
 
 const DashboardPage = () => {
-  const [timeRange, setTimeRange] = useState('month');
+  const [timeRange, setTimeRange] = useState('all');
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [trends, setTrends] = useState([]);
