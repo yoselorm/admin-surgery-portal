@@ -2,12 +2,20 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/api';
 import { api_url_v1 } from '../utils/config';
 
+// Fetch surgeries with the same params the backend supports: status, doctor, procedure, page, limit
 export const fetchSurgeries = createAsyncThunk(
   'surgery/fetchAll',
-  async (_, { rejectWithValue }) => {
+  async ({ status, doctor, procedure, page = 1, limit = 10 } = {}, { rejectWithValue }) => {
     try {
-      const res = await api.get(`${api_url_v1}/surgery`);
-      return res.data.data;
+      const params = {};
+      if (status && status !== 'all') params.status = status;
+      if (doctor) params.doctor = doctor;
+      if (procedure) params.procedure = procedure;
+      params.page = page;
+      params.limit = limit;
+
+      const res = await api.get(`${api_url_v1}/surgery`, { params });
+      return res.data; // { total, page, pages, data }
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -88,7 +96,12 @@ const surgerySlice = createSlice({
     doctor: null,
     success: false,
     count: 0,
-    filteredCount: 0
+    filteredCount: 0,
+    // pagination (mirrors backend response shape)
+    total: 0,
+    page: 1,
+    pages: 1,
+    limit: 10
   },
 
   reducers: {
@@ -114,7 +127,10 @@ const surgerySlice = createSlice({
       })
       .addCase(fetchSurgeries.fulfilled, (state, action) => {
         state.loading = false;
-        state.surgeries = action.payload;
+        state.surgeries = action.payload.data;
+        state.total = action.payload.total;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
       })
       .addCase(fetchSurgeries.rejected, (state, action) => {
         state.loading = false;

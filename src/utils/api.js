@@ -3,7 +3,7 @@ import { api_url_v1 } from "./config";
 
 const api = axios.create({
   baseURL: api_url_v1,
-  withCredentials: true, // allows cookies (refresh token)
+  // No cookies involved anymore — both tokens are sent explicitly.
 });
 
 // Add access token to every request
@@ -27,17 +27,31 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      try {
-        const res = await api.post("/refresh-token");
+      const refreshToken = localStorage.getItem("refreshToken");
 
-        const newToken = res.data.accessToken;
+      // Nothing to refresh with — bail out immediately instead of
+      // hitting the server with an empty refresh request.
+      if (!refreshToken) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/";
+        return Promise.reject(error);
+      }
+
+      try {
+        const res = await api.post("/refresh-token", { refreshToken });
+
+        // Backend rotates both tokens — store the new pair
+        const { accessToken: newToken, refreshToken: newRefreshToken } = res.data;
         localStorage.setItem("accessToken", newToken);
+        if (newRefreshToken) localStorage.setItem("refreshToken", newRefreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (err) {
         console.log("Refresh failed:", err);
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         window.location.href = "/";
       }
     }

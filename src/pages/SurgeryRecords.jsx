@@ -17,18 +17,31 @@ import toast from '../components/Toast';
 const AdminSurgeryRecords = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [page, setPage] = useState(1);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-      const {admin} = useSelector((state)=>state.auth)
-  
+  const { admin } = useSelector((state) => state.auth)
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(fetchSurgeries());
-  }, [dispatch]);
+  // NOTE: the slice is registered under `surgery` (singular) in the store,
+  // so we read from state.surgery — reading state.surgeries here was a bug
+  // that meant loading/pagination values were always undefined.
+  const { surgeries, loading, total, page: currentPage, pages, limit } = useSelector(
+    (state) => state.surgeries
+  );
 
-  const { surgeries, loading } = useSelector((state) => state.surgeries);
+  // Re-fetch from the backend whenever the status filter or page changes,
+  // using the same query params the backend controller supports.
+  useEffect(() => {
+    dispatch(fetchSurgeries({ status: filterStatus, page, limit: 10 }));
+  }, [dispatch, filterStatus, page]);
+
+  // Reset back to page 1 whenever the status filter changes
+  const handleStatusChange = (e) => {
+    setFilterStatus(e.target.value);
+    setPage(1);
+  };
 
   const handleExportWithFilters = async (exportConfig) => {
     try {
@@ -84,21 +97,18 @@ const AdminSurgeryRecords = () => {
     }
   };
 
-  const filteredRecords = surgeries
-    ?.filter((r) => {
-      const term = searchTerm?.toLowerCase();
-      return (
-        r.surgeryId?.toLowerCase().includes(term) ||
-        r.patientName?.toLowerCase().includes(term) ||
-        r.procedure?.toLowerCase().includes(term) ||
-        r.doctor?.fullname?.toLowerCase().includes(term)
-      );
-    })
-    .filter((r) =>
-      filterStatus === "all"
-        ? true
-        : r.status?.toLowerCase() === filterStatus.toLowerCase()
+  // Status filtering + doctor/procedure filtering now happen server-side via
+  // fetchSurgeries params. Search stays client-side, scoped to the current page.
+  const filteredRecords = surgeries?.filter((r) => {
+    const term = searchTerm?.toLowerCase();
+    if (!term) return true;
+    return (
+      r.surgeryId?.toLowerCase().includes(term) ||
+      r.patientName?.toLowerCase().includes(term) ||
+      r.procedure?.toLowerCase().includes(term) ||
+      r.doctor?.fullname?.toLowerCase().includes(term)
     );
+  });
 
   const getStatusBadge = (status) => {
     const color = getStatusColor(status);
@@ -154,7 +164,7 @@ const AdminSurgeryRecords = () => {
           {/* Status Filter */}
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={handleStatusChange}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
             <option value="all">All Status</option>
@@ -278,17 +288,27 @@ const AdminSurgeryRecords = () => {
         {/* Pagination */}
         <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing <span className="font-semibold">1-{Math.min(filteredRecords?.length || 0, 10)}</span> of{' '}
-            <span className="font-semibold">{filteredRecords?.length || 0}</span> records
+            Showing <span className="font-semibold">
+              {total === 0 ? 0 : (currentPage - 1) * limit + 1}-{Math.min(currentPage * limit, total)}
+            </span> of{' '}
+            <span className="font-semibold">{total}</span> records
           </p>
           <div className="flex space-x-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white transition text-sm font-medium">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Previous
             </button>
             <button className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-sm font-medium">
-              1
+              {currentPage}
             </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white transition text-sm font-medium">
+            <button
+              onClick={() => setPage((p) => Math.min(pages || 1, p + 1))}
+              disabled={currentPage >= pages}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-white transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Next
             </button>
           </div>

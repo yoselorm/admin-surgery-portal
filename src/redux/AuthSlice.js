@@ -16,8 +16,9 @@ export const adminLogin = createAsyncThunk(
     try {
       const res = await axios.post(`${api_url_v1}/admin-login`, { email, password });
 
-      // Save accessToken and admin data
+      // Save accessToken, refreshToken, and admin data
       localStorage.setItem("accessToken", res?.data?.accessToken);
+      localStorage.setItem("refreshToken", res?.data?.refreshToken);
       localStorage.setItem("admin", JSON.stringify(res.data.admin));
 
       return res.data; 
@@ -34,10 +35,14 @@ export const logoutUser = createAsyncThunk(
     "auth/logoutUser",
     async (_, { rejectWithValue }) => {
       try {
-        await api.post(`${api_url_v1}/logout`);
-        
+        // No cookie to clear server-side — send the refresh token so the
+        // backend can invalidate it explicitly.
+        const refreshToken = localStorage.getItem("refreshToken");
+        await api.post(`${api_url_v1}/logout`, { refreshToken });
+
         // Clear localStorage
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("admin");
         
         return true;
@@ -45,6 +50,7 @@ export const logoutUser = createAsyncThunk(
         console.log(err);
         // Clear localStorage even if API call fails
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("admin");
         return rejectWithValue("Logout failed");
       }
@@ -58,21 +64,38 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     isSuccess: false,
-    accessToken:localStorage.getItem('accessToken')
+    accessToken: localStorage.getItem('accessToken'),
+    refreshToken: localStorage.getItem('refreshToken'),
   },
   reducers: {
     logout: (state) => {
       state.admin = null;
+      state.accessToken = null;
+      state.refreshToken = null;
       state.isSuccess = false;
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
       localStorage.removeItem("admin");
     },
     clearError: (state) => {
       state.error = null;
     },
-    // Update access token after refresh
-    refreshAccessToken: (state, action) => {
-      localStorage.setItem('accessToken', action.payload);
+    // Update tokens after the axios interceptor rotates them.
+    // Note: the interceptor in api.js writes straight to localStorage on
+    // every refresh without dispatching this — localStorage is the real
+    // source of truth for the live token. Dispatch this only when you
+    // need Redux state itself to reflect a refresh (e.g. right after
+    // login, or if you add a manual "refresh on app load" flow).
+    setTokens: (state, action) => {
+      const { accessToken, refreshToken } = action.payload;
+      if (accessToken) {
+        state.accessToken = accessToken;
+        localStorage.setItem('accessToken', accessToken);
+      }
+      if (refreshToken) {
+        state.refreshToken = refreshToken;
+        localStorage.setItem('refreshToken', refreshToken);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -87,6 +110,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.admin = action.payload.admin;
         state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
         state.isSuccess = true;
         state.error = null;
       })
@@ -102,21 +126,25 @@ const authSlice = createSlice({
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.admin = null;
-        state.accessToken = '';
+        state.accessToken = null;
+        state.refreshToken = null;
         state.loading = false;
         state.isSuccess = false;
         state.error = null;
       })
       .addCase(logoutUser.rejected, (state) => {
         state.admin = null;
+        state.accessToken = null;
+        state.refreshToken = null;
         state.loading = false;
         state.isSuccess = false;
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
         localStorage.removeItem("admin");
       });
   },
 });
 
-export const { logout, clearError, refreshAccessToken } = authSlice.actions;
+export const { logout, clearError, setTokens } = authSlice.actions;
 
 export default authSlice.reducer;

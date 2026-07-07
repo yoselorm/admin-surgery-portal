@@ -141,7 +141,7 @@ const SignInPage = () => {
 
             {/* Remember Me and Forgot Password */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer group">
+              {/* <label className="flex items-center space-x-2 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -151,7 +151,7 @@ const SignInPage = () => {
                 <span className="text-sm text-gray-600 group-hover:text-gray-900 transition">
                   Remember me
                 </span>
-              </label>
+              </label> */}
               <a
                 href="/forgot-password"
                 className="text-sm font-semibold text-cyan-600 hover:text-cyan-700 transition"
