@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
   Search,
-  Plus,
-  MoreVertical,
-  Edit,
-  Trash2,
   UserPlus,
-  User,
-  Stethoscope,
   ChevronDown,
+  ChevronUp,
   CheckCircle,
   XCircle,
+  Edit,
   Eye,
+  KeyRound,
+  ShieldAlert,
 } from "lucide-react";
 import AddEditDoctor from "../components/AddEditDoctor";
 import { getAllDoctors } from "../redux/DoctorSlice";
@@ -21,48 +19,46 @@ import { Link } from "react-router-dom";
 const ManageDoctorsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPasswordUpdate, setFilterPasswordUpdate] = useState("all");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   const dispatch = useDispatch();
-
   const { doctors, loading, error } = useSelector((state) => state.doctor);
-
   const { admin } = useSelector((state) => state.auth);
+  const isSuperAdmin = admin?.role === "super-admin";
 
   useEffect(() => {
     dispatch(getAllDoctors());
   }, [dispatch]);
 
-  const filteredDoctors = doctors?.filter((doctor) => {
-    const matchesSearch =
-      doctor?.doctorId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor?.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredDoctors = doctors
+    ?.filter((doctor) => {
+      const matchesSearch =
+        doctor?.doctorId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doctor?.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doctor?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      filterStatus === "all" || doctor.status === filterStatus;
+      const matchesStatus =
+        filterStatus === "all" || doctor.status === filterStatus;
 
-    return matchesSearch && matchesStatus;
-  });
+      const matchesPasswordUpdate =
+        !isSuperAdmin ||
+        filterPasswordUpdate === "all" ||
+        (filterPasswordUpdate === "updated" && doctor.updatePassword === true) ||
+        (filterPasswordUpdate === "pending" && doctor.updatePassword !== true);
 
-  {
-    error && (
-      <div className="p-4 bg-red-100 text-red-700 rounded-lg m-4">{error}</div>
-    );
-  }
-
-  // const filteredDoctors = doctors.filter((doctor) => {
-  //     const matchesSearch =
-  //         doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //         doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-
-  //     const matchesStatus =
-  //         filterStatus === 'all' || doctor.status === filterStatus;
-
-  //     return matchesSearch && matchesStatus;
-  // });
+      return matchesSearch && matchesStatus && matchesPasswordUpdate;
+    })
+    ?.slice()
+    ?.sort((a, b) => {
+      if (!isSuperAdmin) return 0;
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
 
   const handleEditDoctor = (doctor) => {
     setModalMode("edit");
@@ -73,113 +69,176 @@ const ManageDoctorsPage = () => {
   const getStatusBadge = (status) => {
     if (status === "active") {
       return (
-        <span className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full flex items-center gap-1">
-          <CheckCircle className="w-4 h-4" />
+        <span className="px-2 py-0.5 text-[11px] font-semibold bg-green-100 text-green-700 rounded-full flex items-center gap-1 w-fit">
+          <CheckCircle className="w-3 h-3" />
           Active
         </span>
       );
     }
     return (
-      <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-700 rounded-full flex items-center gap-1">
-        <XCircle className="w-4 h-4" />
+      <span className="px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-700 rounded-full flex items-center gap-1 w-fit">
+        <XCircle className="w-3 h-3" />
         Inactive
       </span>
     );
+  };
+
+  const getPasswordUpdateBadge = (updatePassword) => {
+    if (updatePassword) {
+      return (
+        <span className="px-2 py-0.5 text-[11px] font-semibold bg-green-100 text-green-700 rounded-full flex items-center gap-1 w-fit">
+          <KeyRound className="w-3 h-3" />
+          Updated
+        </span>
+      );
+    }
+    return (
+      <span className="px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-700 rounded-full flex items-center gap-1 w-fit">
+        <ShieldAlert className="w-3 h-3" />
+        Pending
+      </span>
+    );
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"));
   };
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500 font-medium">Loading...</p>
+        <p className="text-gray-500 font-medium text-sm">Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen ">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+    <div className="h-screen flex flex-col p-4 bg-gray-50">
+      {/* Header — fixed, does not scroll */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between shrink-0 mb-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manage Doctors</h1>
-          <p className="text-gray-600 mt-1">
-            View, add, and manage all doctors
-          </p>
+          <h1 className="text-xl font-bold text-gray-900">Manage Doctors</h1>
+          <p className="text-xs text-gray-500">View, add, and manage all doctors</p>
         </div>
         <button
-          className="mt-4 md:mt-0 flex items-center px-5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition font-semibold"
+          className="mt-2 md:mt-0 flex items-center px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:shadow-md transition font-semibold text-sm"
           onClick={() => {
             setModalMode("add");
             setSelectedDoctor(null);
             setIsModalOpen(true);
           }}
         >
-          <UserPlus className="w-5 h-5 mr-2" />
+          <UserPlus className="w-4 h-4 mr-1.5" />
           Add New Doctor
         </button>
       </div>
 
-      {/* Filters Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-        <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
-          {/* Search */}
+      {error && (
+        <div className="p-2 mb-3 bg-red-100 text-red-700 rounded-lg text-sm shrink-0">
+          {error}
+        </div>
+      )}
+
+      {/* Filters — fixed, does not scroll */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 shrink-0 mb-3">
+        <div className="flex flex-col md:flex-row gap-2 md:items-center justify-between">
           <div className="relative w-full md:w-1/3">
-            <Search className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-gray-400 absolute left-2.5 top-2.5" />
             <input
               type="text"
               placeholder="Search doctors..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500"
+              className="w-full pl-8 pr-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-cyan-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Filter by Status */}
-          <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active Only</option>
-            <option value="inactive">Inactive Only</option>
-          </select>
+          <div className="flex flex-col md:flex-row gap-2">
+            <select
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active Only</option>
+              <option value="inactive">Inactive Only</option>
+            </select>
+
+            {isSuperAdmin && (
+              <select
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500"
+                value={filterPasswordUpdate}
+                onChange={(e) => setFilterPasswordUpdate(e.target.value)}
+              >
+                <option value="all">All Passwords</option>
+                <option value="updated">Password Updated</option>
+                <option value="pending">Password Pending</option>
+              </select>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Doctors Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-6">
-        <div className="p-5 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Doctor List</h2>
-          <span className="text-sm text-gray-500">
+      {/* Table container — this is the ONLY scrollable region */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex-1 min-h-0 flex flex-col">
+        <div className="px-4 py-2.5 border-b border-gray-200 flex items-center justify-between shrink-0">
+          <h2 className="text-sm font-bold text-gray-900">Doctor List</h2>
+          <span className="text-xs text-gray-500">
             {filteredDoctors.length} results
           </span>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
-          <table className="w-full table-auto border-collapse text-left">
-            <thead className="bg-gray-50 border-b border-gray-200">
+        <div className="overflow-auto flex-1 min-h-0">
+          <table className="w-full table-auto border-collapse text-left text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
                   Doctor
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
                   Specialty
                 </th>
-                {admin?.role === "super-admin" && (
+                {isSuperAdmin && (
                   <>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
                       Phone
+                    </th>
+                    <th
+                      className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider cursor-pointer select-none"
+                      onClick={toggleSortOrder}
+                      title="Click to toggle sort order"
+                    >
+                      <span className="flex items-center gap-1">
+                        Created
+                        {sortOrder === "desc" ? (
+                          <ChevronDown className="w-3 h-3" />
+                        ) : (
+                          <ChevronUp className="w-3 h-3" />
+                        )}
+                      </span>
+                    </th>
+                    <th className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
+                      Password
                     </th>
                   </>
                 )}
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right pr-10">
+                <th className="px-3 py-2 text-[11px] font-semibold text-gray-600 uppercase tracking-wider text-right pr-6">
                   Actions
                 </th>
               </tr>
@@ -191,10 +250,9 @@ const ManageDoctorsPage = () => {
                   key={doctor._id}
                   className="hover:bg-gray-50/70 transition-colors group"
                 >
-                  {/* Doctor Info */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs uppercase tracking-wider shadow-sm shrink-0">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-7 h-7 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-[10px] uppercase tracking-wider shadow-sm shrink-0">
                         {doctor.fullname
                           ? doctor.fullname
                               .split(" ")
@@ -205,73 +263,71 @@ const ManageDoctorsPage = () => {
                           : "DR"}
                       </div>
                       <div>
-                      {admin.role === "super-admin" && (
-                        <p className="font-semibold text-gray-900 group-hover:text-cyan-600 transition-colors">
-                          {doctor.fullname || "Unknown Doctor"}
-                        </p>
-                      )}
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          ID:{" "}
-                          <span className="font-mono">
-                            {doctor.doctorId || "N/A"}
-                          </span>
+                        {isSuperAdmin && (
+                          <p className="font-semibold text-gray-900 group-hover:text-cyan-600 transition-colors text-sm">
+                            {doctor.fullname || "Unknown Doctor"}
+                          </p>
+                        )}
+                        <p className="text-[11px] text-gray-500">
+                          ID: <span className="font-mono">{doctor.doctorId || "N/A"}</span>
                         </p>
                       </div>
                     </div>
                   </td>
 
-                  {/* Specialty */}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-gray-100 text-gray-800">
                       {doctor.specialty || "General"}
                     </span>
                   </td>
 
-                  {/* Super-Admin Columns */}
-                  {admin?.role === "super-admin" && (
+                  {isSuperAdmin && (
                     <>
-                      <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">
                         {doctor.email || "—"}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 font-mono whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs text-gray-600 font-mono whitespace-nowrap">
                         {doctor.phone || "—"}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">
+                        {formatDate(doctor.createdAt)}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        {getPasswordUpdateBadge(doctor.updatePassword)}
                       </td>
                     </>
                   )}
 
-                  {/* Status */}
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2 whitespace-nowrap">
                     {getStatusBadge(doctor.status)}
                   </td>
 
-                  {/* Actions */}
-                  <td className="px-6 py-4 whitespace-nowrap text-right pr-6">
-                    <div className="flex items-center justify-end space-x-1">
+                  <td className="px-3 py-2 whitespace-nowrap text-right pr-4">
+                    <div className="flex items-center justify-end space-x-0.5">
                       <button
                         onClick={() => handleEditDoctor(doctor)}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                        className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                         title="Edit Doctor"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3.5 h-3.5" />
                       </button>
                       <Link
                         to={`/dashboard/doctor/${doctor._id}`}
-                        className="p-2 text-gray-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all duration-200"
+                        className="p-1.5 text-gray-500 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all duration-200"
                         title="View Details"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </td>
                 </tr>
               ))}
 
-              {/* Empty State Exception fallback */}
               {filteredDoctors?.length === 0 && (
                 <tr>
                   <td
-                    colSpan={admin?.role === "super-admin" ? 6 : 4}
-                    className="text-center py-10 text-gray-400 text-sm font-medium"
+                    colSpan={isSuperAdmin ? 8 : 4}
+                    className="text-center py-8 text-gray-400 text-sm font-medium"
                   >
                     No doctors matching current criteria found.
                   </td>
