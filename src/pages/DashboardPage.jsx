@@ -15,11 +15,16 @@ import {
   MoreVertical,
   ArrowUp,
   ArrowDown,
-  MapPin
+  MapPin,
+  FileDown,
+  Loader2
 } from 'lucide-react';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 import api from '../utils/api';
 import { api_url_v1 } from '../utils/config';
+import { generateAdminReportPDF } from '../utils/reportPdf';
+import toast from '../components/Toast';
 
 const DashboardPage = () => {
   const [timeRange, setTimeRange] = useState('all');
@@ -29,6 +34,8 @@ const DashboardPage = () => {
   const [topDoctors, setTopDoctors] = useState([]);
   const [locationStats, setLocationStats] = useState([]);
   const [recentSurgeries, setRecentSurgeries] = useState([]);
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const admin = useSelector((state) => state.auth.admin);
 
   useEffect(() => {
     fetchAllData();
@@ -55,6 +62,20 @@ const DashboardPage = () => {
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       setLoading(false);
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    try {
+      setGeneratingReport(true);
+      const response = await api.get(`${api_url_v1}/analytics/report?timeRange=${timeRange}`);
+      await generateAdminReportPDF(response.data.data, { generatedBy: admin?.email });
+      toast.success('Report downloaded');
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast.error('Failed to generate report. Please try again.');
+    } finally {
+      setGeneratingReport(false);
     }
   };
 
@@ -167,6 +188,18 @@ const DashboardPage = () => {
             className="px-4 py-1.5 text-sm bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:shadow-md transition font-medium"
           >
             Refresh
+          </button>
+          <button
+            onClick={handleGenerateReport}
+            disabled={generatingReport}
+            className="px-4 py-1.5 text-sm bg-white border border-cyan-600 text-cyan-700 rounded-lg hover:bg-cyan-50 transition font-medium flex items-center space-x-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {generatingReport ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <FileDown className="w-4 h-4" />
+            )}
+            <span>{generatingReport ? 'Generating…' : 'Generate Report'}</span>
           </button>
         </div>
       </div>
